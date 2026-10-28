@@ -1,0 +1,188 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Catalog</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" th:href="@{/products}">
+        <span class="brand-icon">P</span>
+        Product<span class="brand-light">Hub</span>
+    </a>
+    <span class="topbar-label">PRODUCT MANAGEMENT</span>
+</header>
+
+<main class="container">
+
+    <section class="welcome-row">
+        <div>
+            <p class="eyebrow">YOUR INVENTORY, AT A GLANCE</p>
+            <h1>Find your next favorite.</h1>
+            <p class="subtitle">
+                Browse the catalog, check availability, and keep your collection in shape.
+            </p>
+        </div>
+        <a class="button button-primary" th:href="@{/products/new}">
+            <span aria-hidden="true">＋</span> Add a product
+        </a>
+    </section>
+
+    <div class="notice notice-success" role="status"
+         th:if="${successMessage}" th:text="${successMessage}"></div>
+    <div class="notice notice-error" role="alert"
+         th:if="${errorMessage}" th:text="${errorMessage}"></div>
+
+    <section class="stats-grid">
+        <article class="stat-card">
+            <span class="stat-icon" aria-hidden="true">▦</span>
+            <span class="stat-label">TOTAL PRODUCTS</span>
+            <strong th:text="${totalProducts}">0</strong>
+            <span class="stat-note">Products in the catalog</span>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-green" aria-hidden="true">✓</span>
+            <span class="stat-label">IN STOCK</span>
+            <strong th:text="${#lists.size(products.?[stockQuantity > 0])}">0</strong>
+            <span class="stat-note">Ready to order</span>
+        </article>
+
+        <article class="stat-card">
+            <span class="stat-icon stat-icon-orange" aria-hidden="true">◷</span>
+            <span class="stat-label">OUT OF STOCK</span>
+            <strong th:text="${#lists.size(products.?[stockQuantity == 0])}">0</strong>
+            <span class="stat-note">Restock when available</span>
+        </article>
+    </section>
+
+    <section class="catalog-panel">
+        <div class="panel-heading">
+            <div>
+                <p class="eyebrow">THE COLLECTION</p>
+                <h2>Explore products</h2>
+                <p class="muted">A little something for your everyday setup.</p>
+            </div>
+            <span class="result-count"
+                  th:text="${#lists.size(products)} + ' results'">0 results</span>
+        </div>
+
+        <form class="filter-form" th:action="@{/products}" method="get">
+            <div class="search-field">
+                <label for="q">Search products</label>
+                <input id="q" type="search" name="q"
+                       placeholder="Search name or description..."
+                       th:value="${q}">
+            </div>
+
+            <div class="filter-field">
+                <label for="stock">Stock status</label>
+                <select id="stock" name="stock">
+                    <option value="all" th:selected="${stock == 'all'}">All stock</option>
+                    <option value="in" th:selected="${stock == 'in'}">In stock</option>
+                    <option value="out" th:selected="${stock == 'out'}">Out of stock</option>
+                </select>
+            </div>
+
+            <div class="filter-field">
+                <label for="minPrice">Min price (₹)</label>
+                <input id="minPrice" type="number" name="minPrice"
+                       min="0" step="0.01" placeholder="0"
+                       th:value="${minPrice}">
+            </div>
+
+            <div class="filter-field">
+                <label for="maxPrice">Max price (₹)</label>
+                <input id="maxPrice" type="number" name="maxPrice"
+                       min="0" step="0.01" placeholder="Any"
+                       th:value="${maxPrice}">
+            </div>
+
+            <div class="filter-actions">
+                <button class="button button-primary" type="submit">Apply</button>
+                <a class="button button-secondary" th:href="@{/products}">Reset</a>
+            </div>
+        </form>
+
+        <div class="product-grid" th:if="${!products.isEmpty()}">
+            <article class="product-card" th:each="product : ${products}">
+                <div class="product-art"
+                     th:classappend="${#strings.contains(#strings.toLowerCase(product.name), 'laptop')} ? ' art-laptop' : (${#strings.contains(#strings.toLowerCase(product.name), 'mouse')} ? ' art-mouse' : (${#strings.contains(#strings.toLowerCase(product.name), 'keyboard')} ? ' art-keyboard' : ' art-generic'))">
+                    <img th:if="${#strings.contains(#strings.toLowerCase(product.name), 'laptop')}"
+                         th:src="@{/images/products/laptop.svg}" th:alt="${product.name}">
+                    <img th:if="${#strings.contains(#strings.toLowerCase(product.name), 'mouse')}"
+                         th:src="@{/images/products/mouse.svg}" th:alt="${product.name}">
+                    <img th:if="${#strings.contains(#strings.toLowerCase(product.name), 'keyboard')}"
+                         th:src="@{/images/products/keyboard.svg}" th:alt="${product.name}">
+                    <img th:if="${!#strings.contains(#strings.toLowerCase(product.name), 'laptop') and !#strings.contains(#strings.toLowerCase(product.name), 'mouse') and !#strings.contains(#strings.toLowerCase(product.name), 'keyboard')}"
+                         th:src="@{/images/products/product.svg}" th:alt="${product.name}">
+                    <span class="stock-badge"
+                          th:classappend="${product.stockQuantity > 0} ? ' in-stock' : ' out-stock'"
+                          th:text="${product.stockQuantity > 0} ? 'In stock' : 'Out of stock'">
+                        In stock
+                    </span>
+                </div>
+
+                <div class="product-content">
+                    <p class="product-id">
+                        <span th:text="'ITEM #' + ${product.id}">ITEM #1</span>
+                        <span class="product-category">EVERYDAY TECH</span>
+                    </p>
+                    <h3 th:text="${product.name}">Product name</h3>
+                    <p class="product-description"
+                       th:text="${product.description != null and !#strings.isEmpty(product.description) ? product.description : 'No description provided.'}">
+                        Product description
+                    </p>
+
+                    <div class="product-bottom">
+                        <div>
+                            <span class="price-label">PRICE</span>
+                            <p class="product-price">
+                                <span class="currency">₹</span><span th:text="${product.price}">0.00</span>
+                            </p>
+                        </div>
+                        <div class="stock-number">
+                            <span class="price-label">QUANTITY</span>
+                            <p th:text="${product.stockQuantity}">0</p>
+                        </div>
+                    </div>
+
+                    <div class="card-actions">
+                        <a class="button button-secondary"
+                           th:href="@{/products/{id}/edit(id=${product.id})}">
+                            Edit
+                        </a>
+
+                        <form th:action="@{/products/{id}/delete(id=${product.id})}"
+                              method="post"
+                              onsubmit="return confirm('Are you sure you want to delete this product?');">
+                            <button class="button button-danger" type="submit">
+                                Delete
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </article>
+        </div>
+
+        <div class="empty-state" th:if="${products.isEmpty()}">
+            <div class="empty-icon">⌕</div>
+            <h3>No products found</h3>
+            <p>Try changing your search or filters, or add a new product.</p>
+            <a class="button button-primary" th:href="@{/products/new}">
+                Add your first product
+            </a>
+        </div>
+    </section>
+
+    <footer class="footer">
+        ProductHub · Spring Boot Product Catalog System
+    </footer>
+</main>
+
+</body>
+</html>

@@ -1,0 +1,83 @@
+
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Manage Product</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+<header class="topbar">
+    <a class="brand" th:href="@{/products}">
+        <span class="brand-icon">P</span>
+        Product<span class="brand-light">Hub</span>
+    </a>
+    <a class="back-link" th:href="@{/products}">← Back to catalog</a>
+</header>
+
+<main class="form-page">
+    <div class="form-intro">
+        <p class="eyebrow">PRODUCT MANAGEMENT</p>
+        <h1 th:text="${pageTitle}">Add New Product</h1>
+        <p class="subtitle">Enter the details below and save your changes.</p>
+    </div>
+
+    <section class="form-card">
+        <form th:action="@{${formAction}}" th:object="${product}" method="post">
+
+            <div class="notice notice-error" role="alert"
+                 th:if="${#fields.hasAnyErrors()}">
+                Please correct the highlighted fields and try again.
+            </div>
+
+            <div class="form-group">
+                <label for="name">Product name <span class="required">*</span></label>
+                <input id="name" type="text" th:field="*{name}"
+                       placeholder="e.g. Wireless Mouse" maxlength="100" required>
+                <p class="field-error" th:if="${#fields.hasErrors('name')}"
+                   th:errors="*{name}">Name error</p>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}"
+                          rows="4" maxlength="500"
+                          placeholder="Describe your product..."></textarea>
+                <p class="field-error" th:if="${#fields.hasErrors('description')}"
+                   th:errors="*{description}">Description error</p>
+            </div>
+
+            <div class="form-two-columns">
+                <div class="form-group">
+                    <label for="price">Price (₹) <span class="required">*</span></label>
+                    <input id="price" type="number" th:field="*{price}"
+                           min="0.01" step="0.01" placeholder="999.00" required>
+                    <p class="field-error" th:if="${#fields.hasErrors('price')}"
+                       th:errors="*{price}">Price error</p>
+                </div>
+
+                <div class="form-group">
+                    <label for="stockQuantity">Stock quantity <span class="required">*</span></label>
+                    <input id="stockQuantity" type="number"
+                           th:field="*{stockQuantity}"
+                           min="0" step="1" placeholder="10" required>
+                    <p class="field-error"
+                       th:if="${#fields.hasErrors('stockQuantity')}"
+                       th:errors="*{stockQuantity}">Stock error</p>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <a class="button button-secondary" th:href="@{/products}">Cancel</a>
+                <button class="button button-primary" type="submit">Save Product</button>
+            </div>
+        </form>
+    </section>
+
+    <p class="form-footnote">Fields marked * are required.</p>
+</main>
+
+</body>
+</html>
